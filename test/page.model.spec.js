@@ -100,8 +100,8 @@ describe('Page model', function () {
 
   describe('Instance methods', function () {
 
-	  	var arr1, arr2, arr3;
-  	  beforeEach(function (done) {
+	  	var base, shared, notShared;
+  	  before(function (done) {
 	  		var obj1 = {
 	  			title: 'base',
 	  			content: 'bar',
@@ -113,7 +113,7 @@ describe('Page model', function () {
 	  			tags: ['foo', 'baz']
 	  		};
 	  		var obj3 = {
-	  			title: 'noShared',
+	  			title: 'notShared',
 	  			content: 'bar',
 	  			tags: ['baz', 'box']
 	  		};
@@ -122,24 +122,48 @@ describe('Page model', function () {
 	  			return Page.create(obj);
 	  		}))
 	  		.then(function (arr) {
-	  					arr1 = arr[0];
-	  					arr2 = arr[1];
-	  					arr3 = arr[2];
+	  					base = arr[0];
+	  					shared = arr[1];
+	  					notShared = arr[2];
 	  					done();
 	  				})
 	  		.catch(done);
 	  	});
 
+	  	after(function(done){
+	  		Page.destroy({where:{}});
+	  		done();
+	  	});
+
     describe('findSimilar', function () {
       it('never gets itself', function (done) {
-      	arr1.findSimilar().then(function(similarPages){
-      		expect(similarPages).not.to.include(arr1);
+      	base.findSimilar().then(function(similarPages){
+      		var similarPageIds = similarPages.map(function(page){
+      			return page.dataValues.id;
+      		})
+      		expect(similarPageIds).not.to.contain(base.dataValues.id);
       		done();
       	}).catch(done);
       });
-      it('gets other pages with any common tags');
-      it('does not get other pages without any common tags');
-    });
+      it('gets other pages with any common tags', function (done) {
+      	base.findSimilar().then(function(similarPages){
+      		var similarPageIds = similarPages.map(function(page){
+      			return page.dataValues.id;
+      		})
+      		expect(similarPageIds).to.contain(shared.dataValues.id);
+      		done();
+      	}).catch(done); 
+      });   
+      it('does not get other pages without any common tags', function (done) {
+      	base.findSimilar().then(function(similarPages){
+      		var similarPageIds = similarPages.map(function(page){
+      			return page.dataValues.id;
+      		})
+      		expect(similarPageIds).not.to.contain(notShared.dataValues.id);
+      		done();
+      	}).catch(done); 
+      });
+    });   
   });
 
   describe('Validations', function () {
