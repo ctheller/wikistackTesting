@@ -13,7 +13,7 @@ app.set('view engine', 'html');
 app.engine('html', swig.renderFile);
 swig.setDefaults({ cache: false });
 
-app.use(morgan('dev'));
+//app.use(morgan('dev'));
 app.use(express.static(path.join(__dirname, './public')));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());

@@ -208,7 +208,15 @@ describe('Page model', function () {
   });
 
   describe('Hooks', function () {
-    it('it sets urlTitle based on title before validating');
+    it('it sets urlTitle based on title before validating', function(done){
+      Page.create({title: 'urls are so/ cool', content:'content'})
+    .then(function(newPage){
+      expect(newPage.urlTitle).to.equal("urls_are_so_cool");
+      done();
+    })
+    .catch(done);
+
+    });
   });
 
 });
