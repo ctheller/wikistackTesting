@@ -4,6 +4,9 @@ var spies = require('chai-spies');
 chai.use(spies);
 var models = require('../models');
 var Page = models.Page;
+var things = require('chai-things');
+chai.use(things);
+
 
 // var props = {
 // 	title: 'page title',
@@ -40,6 +43,11 @@ var Page = models.Page;
 // });
 
 describe('Page model', function () {
+
+  after(function(done){
+        Page.destroy({where:{}});
+        done();
+      });
 
   describe('Virtuals', function () {
 
@@ -167,9 +175,36 @@ describe('Page model', function () {
   });
 
   describe('Validations', function () {
-    it('errors without title');
-    it('errors without content');
-    it('errors given an invalid status');
+    it('errors without title', function(done){
+      var page = Page.build({urlTitle: "hey", content:"content"});
+      page.validate()
+      .then(function(result){
+        expect(result).not.to.equal(null);
+        expect(result.errors).to.contain.a.thing.with.property("path", "title");
+        done();
+      });
+    });
+    it('errors without content', function(done){
+      var page = Page.build({title: 'url', urlTitle: 'url'});
+      page.validate()
+      .then(function(result){
+        expect(result).not.to.equal(null);
+        expect(result.errors).to.contain.a.thing.with.property("path", "content");
+        done();
+      })
+    });
+    it('errors given an invalid status', function(done){
+      var page = Page.build({title: 'url', urlTitle: 'url', content:'content', status:'chicken'});
+      page.save()
+      .then(function(){
+        done();
+      })
+      .catch(function(err){
+        expect(err).to.exist;
+        expect(err).to.have.property("name", "SequelizeDatabaseError");
+        done();
+      });
+    });
   });
 
   describe('Hooks', function () {
